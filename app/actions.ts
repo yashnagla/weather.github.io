@@ -1,10 +1,11 @@
 "use server";
 
 export async function fetchWeather(city: string) {
-  const API_KEY = process.env.OPENWEATHER_API_KEY;
+  const API_KEY = process.env.OPENWEATHER_API_KEY || "d4d914666a024567ee8d2f9efd3ce27f";
 
   if (!API_KEY) {
-    throw new Error("Missing OpenWeather API key");
+    // throw new Error("Missing OpenWeather API key. Please set OPENWEATHER_API_KEY in your .env.local file.");
+    throw new Error("Try after sometime.");
   }
 
   const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
