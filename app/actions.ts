@@ -7,21 +7,39 @@ export async function fetchWeather(city: string) {
     throw new Error("Missing OpenWeather API key");
   }
 
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
     city
   )}&units=metric&appid=${API_KEY}`;
 
-  const res = await fetch(url, {
-    cache: "no-store",
-  });
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(
+    city
+  )}&units=metric&appid=${API_KEY}`;
 
-  const json = await res.json();
+  // Fetch current weather and 5-day forecast concurrently
+  const [weatherRes, forecastRes] = await Promise.all([
+    fetch(weatherUrl, { cache: "no-store" }),
+    fetch(forecastUrl, { cache: "no-store" }).catch(() => null),
+  ]);
 
-  if (!res.ok) {
+  const weatherJson = await weatherRes.json();
+
+  if (!weatherRes.ok) {
     throw new Error(
-      json?.message || `OpenWeather API failed with status ${res.status}`
+      weatherJson?.message || `OpenWeather API failed with status ${weatherRes.status}`
     );
   }
 
-  return json;
+  let forecastJson = null;
+  if (forecastRes && forecastRes.ok) {
+    try {
+      forecastJson = await forecastRes.json();
+    } catch {
+      forecastJson = null;
+    }
+  }
+
+  return {
+    current: weatherJson,
+    forecast: forecastJson,
+  };
 }
