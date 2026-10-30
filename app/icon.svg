@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="45%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#070b14"/>
+    </linearGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#c084fc" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.5"/>
+    </linearGradient>
+
+    <!-- Sun Glow Gradient -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb703" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#fb8500" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#fb8500" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Sun Core Gradient -->
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe66d"/>
+      <stop offset="40%" stop-color="#ff9e00"/>
+      <stop offset="100%" stop-color="#e85d04"/>
+    </linearGradient>
+
+    <!-- Sun Orbit Ring Gradient -->
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd166" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#f77f00" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#d62828" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Cloud Back Shadow/Ambient Gradient -->
+    <linearGradient id="cloudBackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <!-- Cloud Front Gradient -->
+    <linearGradient id="cloudFrontGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#f0f9ff"/>
+      <stop offset="70%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#bae6fd"/>
+    </linearGradient>
+
+    <!-- Cloud Bottom Shading -->
+    <linearGradient id="cloudShade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <!-- Raindrop Gradient -->
+    <linearGradient id="dropGrad1" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="dropGrad2" x1="0%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+
+    <!-- Wind Stream Gradient -->
+    <linearGradient id="windGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0"/>
+      <stop offset="35%" stop-color="#38bdf8" stop-opacity="0.7"/>
+      <stop offset="75%" stop-color="#a7f3d0" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#6ee7b7" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Soft Filter for Atmospheric Ambient Glow -->
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="dropGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge> 
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── 1. Icon Squircle Base Container ── -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)"/>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="url(#borderGrad)" stroke-width="3"/>
+
+  <!-- Subtle Atmospheric Internal Grid / Horizon Arc -->
+  <path d="M 60,370 C 160,340 350,340 452,370" stroke="url(#windGrad)" stroke-width="2" fill="none" opacity="0.4"/>
+  <path d="M 80,400 C 180,380 330,380 432,400" stroke="url(#windGrad)" stroke-width="1.5" fill="none" opacity="0.25"/>
+
+  <!-- ── 2. The Sun & Solar Atmosphere ── -->
+  <!-- Ambient Sun Halo (Behind) -->
+  <circle cx="328" cy="192" r="115" fill="url(#sunGlow)"/>
+
+  <!-- Dynamic Solar Corona Orbit Arcs -->
+  <path d="M 328,88 A 104,104 0 0,1 432,192" fill="none" stroke="url(#orbitGrad)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 425,150 A 104,104 0 0,1 432,192" fill="none" stroke="#ffe66d" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="432" cy="192" r="4.5" fill="#fff7ed"/>
+
+  <path d="M 235,145 A 104,104 0 0,1 300,92" fill="none" stroke="url(#orbitGrad)" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Core Sun Sphere -->
+  <circle cx="328" cy="192" r="68" fill="url(#sunGrad)" filter="url(#dropGlow)"/>
+  <!-- Sun Specular Reflection -->
+  <ellipse cx="308" cy="166" rx="28" ry="16" transform="rotate(-25 308 166)" fill="#ffffff" opacity="0.45"/>
+
+  <!-- ── 3. Back Atmosphere / Cloud Depth Layer ── -->
+  <path d="M 180,240
+           A 46,46 0 0,1 254,204
+           A 58,58 0 0,1 348,228
+           A 44,44 0 0,1 386,276
+           L 155,276
+           A 42,42 0 0,1 180,240 Z"
+        fill="url(#cloudBackGrad)"/>
+
+  <!-- ── 4. Main Luminous Volumetric Cloud ── -->
+  <g filter="url(#dropGlow)">
+    <!-- Base Cloud Path -->
+    <path d="M 160,344
+             L 348,344
+             A 48,48 0 0,0 396,296
+             A 46,46 0 0,0 358,252
+             A 54,54 0 0,0 310,230
+             A 72,72 0 0,0 182,216
+             A 62,62 0 0,0 114,292
+             A 52,52 0 0,0 160,344 Z"
+          fill="url(#cloudFrontGrad)"/>
+
+    <!-- Bottom Volume Shader -->
+    <path d="M 160,344
+             L 348,344
+             A 48,48 0 0,0 396,296
+             A 46,46 0 0,0 358,252
+             C 340,305 270,338 160,344 Z"
+          fill="url(#cloudShade)"/>
+
+    <!-- Cloud Specular Edge Light (Top Crest Highlight) -->
+    <path d="M 124,280
+             A 62,62 0 0,1 182,220
+             A 72,72 0 0,1 306,234
+             A 54,54 0 0,1 354,256"
+          fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.75"/>
+  </g>
+
+  <!-- ── 5. Atmospheric Wind Stream Ribbon ── -->
+  <path d="M 90,326 C 130,326 150,314 185,314 C 225,314 240,328 290,328 C 340,328 370,305 410,305"
+        fill="none" stroke="url(#windGrad)" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- ── 6. Precision Weather Droplets (Dynamic Accents) ── -->
+  <!-- Droplet 1 (Left, primary) -->
+  <g transform="translate(178, 376) rotate(15)">
+    <path d="M 0,-18 C 0,-18 10,2 10,10 A 10,10 0 0,1 -10,10 C -10,2 0,-18 0,-18 Z"
+          fill="url(#dropGrad1)"/>
+    <ellipse cx="-3" cy="8" rx="2.5" ry="4" fill="#ffffff" opacity="0.6"/>
+  </g>
+
+  <!-- Droplet 2 (Center-right, secondary) -->
+  <g transform="translate(254, 386) rotate(15)">
+    <path d="M 0,-14 C 0,-14 8,1 8,8 A 8,8 0 0,1 -8,8 C -8,1 0,-14 0,-14 Z"
+          fill="url(#dropGrad2)"/>
+    <ellipse cx="-2.5" cy="6.5" rx="2" ry="3" fill="#ffffff" opacity="0.6"/>
+  </g>
+
+  <!-- Droplet 3 (Right, light accent) -->
+  <g transform="translate(328, 378) rotate(15)">
+    <path d="M 0,-12 C 0,-12 6.5,1 6.5,6.5 A 6.5,6.5 0 0,1 -6.5,6.5 C -6.5,1 0,-12 0,-12 Z"
+          fill="url(#dropGrad1)" opacity="0.85"/>
+    <ellipse cx="-2" cy="5" rx="1.5" ry="2.5" fill="#ffffff" opacity="0.65"/>
+  </g>
+
+  <!-- Sparkle / High-Pressure Starlet (Crisp modern accent) -->
+  <g transform="translate(398, 120)">
+    <path d="M 0,-14 Q 0,0 14,0 Q 0,0 0,14 Q 0,0 -14,0 Q 0,0 0,-14 Z" fill="#ffeaa7"/>
+    <circle cx="0" cy="0" r="2.5" fill="#ffffff"/>
+  </g>
+</svg>
