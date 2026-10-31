@@ -9,7 +9,17 @@ import { logEvent } from "firebase/analytics";
 
 type WeatherState = "idle" | "loading" | "found" | "not-found";
 type Unit = "C" | "F";
-type ActiveTab = "overview" | "hourly" | "daily" | "sun";
+type ActiveTab = "overview" | "aqi" | "hourly" | "daily" | "sun";
+
+interface AirQualityData {
+  aqi: number;
+  co: number;
+  no2: number;
+  o3: number;
+  so2: number;
+  pm2_5: number;
+  pm10: number;
+}
 
 interface WeatherData {
   cityName: string;
@@ -320,6 +330,130 @@ function IconCompass() {
   );
 }
 
+function IconLeaf({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`${className} fill-none stroke-emerald-300 stroke-2`}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 01-9-9c0-4.97 4.03-9 9-9 0 0 9 0 9 9 0 4.97-4.03 9-9 9z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12c4 0 7 2 9 9" />
+    </svg>
+  );
+}
+
+function IconActivity() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-sky-300 stroke-2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+    </svg>
+  );
+}
+
+function IconWindow() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-teal-300 stroke-2">
+      <rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="12" y1="3" x2="12" y2="21" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="3" y1="12" x2="21" y2="12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconMask() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-amber-300 stroke-2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 10c0-1.5 2-3 8-3s8 1.5 8 3v4c0 3-3 6-8 6s-8-3-8-6v-4z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 11H2m18 0h2m-2 3h2M4 14H2" />
+    </svg>
+  );
+}
+
+function IconShieldAlert() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-rose-300 stroke-2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <line x1="12" y1="8" x2="12" y2="12" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="16" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+interface AqiInfo {
+  label: string;
+  badgeBg: string;
+  badgeBorder: string;
+  textColor: string;
+  summary: string;
+  outdoorAdvice: string;
+  ventilationAdvice: string;
+  maskAdvice: string;
+  vulnerableAdvice: string;
+}
+
+function getAqiInfo(aqi: number): AqiInfo {
+  switch (aqi) {
+    case 1:
+      return {
+        label: "Good",
+        badgeBg: "bg-emerald-500/20",
+        badgeBorder: "border-emerald-500/40",
+        textColor: "text-emerald-300",
+        summary: "Air quality is satisfactory and poses little to no health risk.",
+        outdoorAdvice: "Ideal conditions for outdoor sports, jogging, and walking.",
+        ventilationAdvice: "Great time to open windows and let fresh air into your home.",
+        maskAdvice: "No mask required for general public or sensitive groups.",
+        vulnerableAdvice: "Safe for children, elderly, and respiratory patients.",
+      };
+    case 2:
+      return {
+        label: "Fair",
+        badgeBg: "bg-lime-500/20",
+        badgeBorder: "border-lime-500/40",
+        textColor: "text-lime-300",
+        summary: "Air quality is acceptable; mild sensitivity possible for very few people.",
+        outdoorAdvice: "Normal outdoor activities and exercise are safe.",
+        ventilationAdvice: "Safe to open windows and ventilate rooms.",
+        maskAdvice: "Unusually sensitive people may monitor for minor coughing.",
+        vulnerableAdvice: "Generally safe; keep regular medications accessible.",
+      };
+    case 3:
+      return {
+        label: "Moderate",
+        badgeBg: "bg-amber-500/20",
+        badgeBorder: "border-amber-500/40",
+        textColor: "text-amber-300",
+        summary: "Sensitive groups may experience symptoms; general public is less affected.",
+        outdoorAdvice: "Reduce strenuous or prolonged outdoor workouts.",
+        ventilationAdvice: "Close windows during peak traffic or dusty hours.",
+        maskAdvice: "Wear a mask if sensitive to dust, haze, or smoke.",
+        vulnerableAdvice: "People with asthma or lung conditions should limit exertion.",
+      };
+    case 4:
+      return {
+        label: "Poor",
+        badgeBg: "bg-rose-500/20",
+        badgeBorder: "border-rose-500/40",
+        textColor: "text-rose-300",
+        summary: "Everyone may begin to experience health effects; sensitive groups higher risk.",
+        outdoorAdvice: "Avoid prolonged outdoor running, sports, or heavy exertion.",
+        ventilationAdvice: "Keep windows shut; run an indoor air purifier.",
+        maskAdvice: "Wear an N95 or KN95 protective mask outdoors.",
+        vulnerableAdvice: "Children, seniors, and asthmatics should remain indoors.",
+      };
+    case 5:
+    default:
+      return {
+        label: "Very Poor",
+        badgeBg: "bg-purple-500/25",
+        badgeBorder: "border-purple-500/50",
+        textColor: "text-purple-300",
+        summary: "Emergency health warning: Entire population is at high risk.",
+        outdoorAdvice: "Avoid all outdoor physical activity and exercise.",
+        ventilationAdvice: "Keep all windows and doors tightly sealed; run air purifier.",
+        maskAdvice: "N95 / respirator mask strictly required if stepping outside.",
+        vulnerableAdvice: "Sensitive groups must remain strictly indoors with filtered air.",
+      };
+  }
+}
+
 /* ═══════════════════════════════════════════
    Stat card component
 ═══════════════════════════════════════════ */
@@ -398,6 +532,7 @@ export default function WeatherPage() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [hourlyForecast, setHourlyForecast] = useState<HourlyItem[]>([]);
   const [dailyForecast, setDailyForecast] = useState<DailyItem[]>([]);
+  const [airQuality, setAirQuality] = useState<AirQualityData | null>(null);
   const [unit, setUnit] = useState<Unit>("C");
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [animKey, setAnimKey] = useState(0);
@@ -515,9 +650,26 @@ export default function WeatherPage() {
         setDailyForecast([]);
       }
 
+      // Parse Air Quality if available
+      if (data.airPollution?.list?.[0]) {
+        const aqItem = data.airPollution.list[0];
+        setAirQuality({
+          aqi: aqItem.main?.aqi || 1,
+          co: Math.round(aqItem.components?.co || 0),
+          no2: Math.round((aqItem.components?.no2 || 0) * 10) / 10,
+          o3: Math.round((aqItem.components?.o3 || 0) * 10) / 10,
+          so2: Math.round((aqItem.components?.so2 || 0) * 10) / 10,
+          pm2_5: Math.round((aqItem.components?.pm2_5 || 0) * 10) / 10,
+          pm10: Math.round((aqItem.components?.pm10 || 0) * 10) / 10,
+        });
+      } else {
+        setAirQuality(null);
+      }
+
       setAnimKey((k) => k + 1);
       setAppState("found");
     } catch {
+      setAirQuality(null);
       setAppState("not-found");
     }
   }
@@ -716,10 +868,11 @@ export default function WeatherPage() {
                 </div>
 
                 {/* ── Navigation Tabs ── */}
-                <div className="mt-5 grid grid-cols-4 gap-1 bg-white/10 p-1 rounded-2xl border border-white/15">
+                <div className="mt-5 grid grid-cols-5 gap-1 bg-white/10 p-1 rounded-2xl border border-white/15">
                   {(
                     [
                       { id: "overview", label: "Overview" },
+                      { id: "aqi", label: "Air Quality" },
                       { id: "sun", label: "Sun & Astro" },
                       { id: "hourly", label: "Hourly (24h)" },
                       { id: "daily", label: "5-Day" },
@@ -788,6 +941,179 @@ export default function WeatherPage() {
                       label="Min / Max"
                       subtext={`Spread ${Math.abs(toUnit(weather.tempMax, unit) - toUnit(weather.tempMin, unit))}°`}
                     />
+
+                    {/* AQI Quick-Banner in Overview */}
+                    {airQuality && (
+                      <button
+                        onClick={() => setActiveTab("aqi")}
+                        className={`col-span-2 sm:col-span-3 p-3 rounded-2xl border backdrop-blur-sm flex items-center justify-between text-left transition-all hover:bg-white/15 cursor-pointer ${getAqiInfo(airQuality.aqi).badgeBg} ${getAqiInfo(airQuality.aqi).badgeBorder}`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <IconLeaf className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-bold text-xs uppercase tracking-wider">Air Quality</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getAqiInfo(airQuality.aqi).badgeBg} ${getAqiInfo(airQuality.aqi).textColor} ${getAqiInfo(airQuality.aqi).badgeBorder}`}>
+                                Level {airQuality.aqi} • {getAqiInfo(airQuality.aqi).label}
+                              </span>
+                            </div>
+                            <p className="text-white/70 text-[11px] truncate mt-0.5">{getAqiInfo(airQuality.aqi).summary}</p>
+                          </div>
+                        </div>
+                        <span className="text-white/80 hover:text-white text-xs font-semibold shrink-0 ml-2">Health Advice →</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* ── TAB: Air Quality Index ── */}
+                {activeTab === "aqi" && (
+                  <div className="mt-4 animate-fade-in">
+                    {airQuality ? (
+                      (() => {
+                        const info = getAqiInfo(airQuality.aqi);
+                        const aqiPercent = Math.min((airQuality.aqi / 5) * 100, 100);
+                        return (
+                          <div className="space-y-3">
+                            {/* AQI Header Card */}
+                            <div className="p-4 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                                    <IconLeaf />
+                                  </div>
+                                  <div>
+                                    <p className="text-white font-bold text-base leading-tight">
+                                      Air Quality Index
+                                    </p>
+                                    <p className="text-white/50 text-[11px] font-medium mt-0.5">
+                                      OpenWeather Air Pollution API
+                                    </p>
+                                  </div>
+                                </div>
+                                <span
+                                  className={`px-3 py-1 rounded-full text-xs font-bold border ${info.badgeBg} ${info.badgeBorder} ${info.textColor}`}
+                                >
+                                  {airQuality.aqi} — {info.label}
+                                </span>
+                              </div>
+
+                              {/* AQI Progress Bar */}
+                              <div className="relative h-3 rounded-full bg-white/10 overflow-hidden">
+                                <div
+                                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-700"
+                                  style={{ width: `${aqiPercent}%` }}
+                                />
+                                <div className="absolute inset-0 flex items-center justify-between px-1 pointer-events-none">
+                                  {[1, 2, 3, 4, 5].map((level) => (
+                                    <div
+                                      key={level}
+                                      className={`w-1 h-1 rounded-full ${
+                                        airQuality.aqi >= level ? "bg-white/80" : "bg-white/20"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex justify-between text-[10px] text-white/40 mt-1 px-0.5">
+                                <span>Good</span>
+                                <span>Fair</span>
+                                <span>Moderate</span>
+                                <span>Poor</span>
+                                <span>Very Poor</span>
+                              </div>
+
+                              {/* Summary */}
+                              <p className="text-white/70 text-xs leading-relaxed mt-3">
+                                {info.summary}
+                              </p>
+                            </div>
+
+                            {/* Pollutant Breakdown Grid */}
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                { label: "PM₂.₅", value: airQuality.pm2_5, unit: "µg/m³", warn: 25 },
+                                { label: "PM₁₀", value: airQuality.pm10, unit: "µg/m³", warn: 50 },
+                                { label: "O₃", value: airQuality.o3, unit: "µg/m³", warn: 100 },
+                                { label: "NO₂", value: airQuality.no2, unit: "µg/m³", warn: 40 },
+                                { label: "SO₂", value: airQuality.so2, unit: "µg/m³", warn: 20 },
+                                { label: "CO", value: airQuality.co, unit: "µg/m³", warn: 4400 },
+                              ].map((p) => (
+                                <div
+                                  key={p.label}
+                                  className="p-2.5 rounded-xl bg-white/10 border border-white/15 text-center hover:bg-white/15 transition-all"
+                                >
+                                  <p className="text-white/50 text-[10px] font-semibold uppercase tracking-wider">
+                                    {p.label}
+                                  </p>
+                                  <p
+                                    className={`text-base font-bold mt-0.5 ${
+                                      p.value > p.warn ? "text-rose-300" : "text-white"
+                                    }`}
+                                  >
+                                    {p.value}
+                                  </p>
+                                  <p className="text-white/35 text-[9px] mt-0.5">{p.unit}</p>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Health Advice Cards */}
+                            <div className="space-y-2">
+                              <p className="text-white/60 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                                <IconShieldAlert />
+                                Health Advice
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {[
+                                  {
+                                    icon: <IconActivity />,
+                                    title: "Outdoor Activity",
+                                    advice: info.outdoorAdvice,
+                                  },
+                                  {
+                                    icon: <IconWindow />,
+                                    title: "Ventilation",
+                                    advice: info.ventilationAdvice,
+                                  },
+                                  {
+                                    icon: <IconMask />,
+                                    title: "Mask Advisory",
+                                    advice: info.maskAdvice,
+                                  },
+                                  {
+                                    icon: <IconShieldAlert />,
+                                    title: "Vulnerable Groups",
+                                    advice: info.vulnerableAdvice,
+                                  },
+                                ].map((card) => (
+                                  <div
+                                    key={card.title}
+                                    className="p-3 rounded-xl bg-white/8 border border-white/15 hover:bg-white/12 transition-all"
+                                  >
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                      {card.icon}
+                                      <span className="text-white/80 text-xs font-semibold">
+                                        {card.title}
+                                      </span>
+                                    </div>
+                                    <p className="text-white/55 text-[11px] leading-relaxed">
+                                      {card.advice}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="py-6 text-center text-white/60 text-xs">
+                        Air quality data not available for this location.
+                      </div>
+                    )}
                   </div>
                 )}
 
